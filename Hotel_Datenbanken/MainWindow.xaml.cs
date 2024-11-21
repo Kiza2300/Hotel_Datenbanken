@@ -1,4 +1,6 @@
 ﻿using MySqlConnector;
+using System.Data;
+using System.Security.Policy;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,21 +27,33 @@ namespace Hotel_Datenbanken
 
         public void Connection()
         {
-            using (var connection = new MySqlConnection("Server=localhost; User ID = root; Password = ; Database = hotel")) 
-            { 
+            using (var connection = new MySqlConnection("Server=localhost; User ID = root; Password = ; Database = test"))
+            {
                 connection.Open();
 
-                using (var command = new MySqlCommand("SELECT * FROM gast; ",connection))
+                var command = new MySqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='hotel'  ", connection);
+
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        if (reader.GetInt32(0) == 1) { 
-                            test.Text = reader.GetString(1);
-                        }
+                        combobox.Items.Add(reader.GetString(0));
+                        //test.Text = reader.GetString(i);
                     }
                 }
+
+                command = new MySqlCommand("SELECT * FROM " + "gast");
+
+                using (var adapter = new MySqlDataAdapter(command))
+                {
+                    DataTable GastTablle = new DataTable();
+
+                    adapter.Fill(GastTablle);
+
+                    tabelle.ItemsSource = GastTablle.DefaultView;
+                }
             }
+
         }
     }
 }
